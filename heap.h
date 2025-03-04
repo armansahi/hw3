@@ -2,6 +2,8 @@
 #define HEAP_H
 #include <functional>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 template <typename T, typename PComparator = std::less<T> >
 class Heap
@@ -15,20 +17,27 @@ public:
    *          as an argument and returns a bool if the first argument has
    *          priority over the second.
    */
-  Heap(int m=2, PComparator c = PComparator());
+  Heap(int m=2, PComparator c = PComparator()): m_(m), cmp_(c), data_() {
+    if (m_ < 2) {
+      m_ = 2;
+    }
+  }
 
   /**
   * @brief Destroy the Heap object
   * 
   */
-  ~Heap();
+  ~Heap() { }
 
   /**
    * @brief Push an item to the heap
    * 
    * @param item item to heap
    */
-  void push(const T& item);
+  void push(const T& item) {
+    data_.push_back(item);
+    heapifyUp(data_.size() - 1);
+  }
 
   /**
    * @brief Returns the top (priority) item
@@ -36,14 +45,28 @@ public:
    * @return T const& top priority item
    * @throw std::underflow_error if the heap is empty
    */
-  T const & top() const;
+  T const & top() const {
+    if(empty()) {
+      throw std::underflow_error("Heap underflow: top() called on an empty heap.");
+    }
+    return data_[0];
+  }
 
   /**
    * @brief Remove the top priority item
    * 
    * @throw std::underflow_error if the heap is empty
    */
-  void pop();
+  void pop() {
+    if(empty()) {
+      throw std::underflow_error("Heap underflow: pop() called on an empty heap.");
+    }
+    data_[0] = data_.back();
+    data_.pop_back();
+    if(!empty()) {
+      heapifyDown(0);
+    }
+  }
 
   /// returns true if the heap is empty
 
@@ -51,65 +74,56 @@ public:
    * @brief Returns true if the heap is empty
    * 
    */
-  bool empty() const;
+  bool empty() const {
+    return data_.empty();
+  }
 
     /**
    * @brief Returns size of the heap
    * 
    */
-  size_t size() const;
+  size_t size() const {
+    return data_.size();
+  }
 
 private:
   /// Add whatever helper functions and data members you need below
+  int m_; // m-ary val must be >= 2
 
+  PComparator cmp_; // comparator functor for priority
 
+  std::vector<T> data_; // container for heap
 
+  void heapifyUp(int i) {
+    while(i > 0) {
+      int parent = (i - 1) / m_;
+      if(cmp_(data_[i], data_[parent])) {
+        std::swap(data_[i], data_[parent]);
+        i = parent;
+      }
+      else {
+        break;
+      }
+    }
+  }
 
+  void heapifyDown(int i) {
+    int heapSize = data_.size();
+    int bestIndex = i;
+    int firstChild = m_ * i + 1;
+
+    for (int j = 0; j < m_; j++) {
+      int child = firstChild + j;
+      if (child < heapSize && cmp_(data_[child], data_[bestIndex])) {
+        bestIndex = child;
+      }
+    }
+    if(bestIndex != i) {
+      std::swap(data_[i], data_[bestIndex]);
+      heapifyDown(bestIndex);
+    }
+  }
 };
-
-// Add implementation of member functions here
-
-
-// We will start top() for you to handle the case of 
-// calling top on an empty heap
-template <typename T, typename PComparator>
-T const & Heap<T,PComparator>::top() const
-{
-  // Here we use exceptions to handle the case of trying
-  // to access the top element of an empty heap
-  if(empty()){
-    // ================================
-    // throw the appropriate exception
-    // ================================
-
-
-  }
-  // If we get here we know the heap has at least 1 item
-  // Add code to return the top element
-
-
-
-}
-
-
-// We will start pop() for you to handle the case of 
-// calling top on an empty heap
-template <typename T, typename PComparator>
-void Heap<T,PComparator>::pop()
-{
-  if(empty()){
-    // ================================
-    // throw the appropriate exception
-    // ================================
-
-
-  }
-
-
-
-}
-
-
 
 #endif
 
