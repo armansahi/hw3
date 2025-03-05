@@ -47,7 +47,7 @@ public:
    */
   T const & top() const {
     if(empty()) {
-      throw std::underflow_error("Heap underflow: top() called on an empty heap.");
+      throw std::underflow_error("Heap underflow: top() called on an empty heap."); // call top on empty heap
     }
     return data_[0];
   }
@@ -96,10 +96,10 @@ private:
 
   void heapifyUp(int i) {
     while(i > 0) {
-      int parent = (i - 1) / m_;
+      int parent = (i - 1) / m_; // find parent in m-ary heap
       if(cmp_(data_[i], data_[parent])) {
         std::swap(data_[i], data_[parent]);
-        i = parent;
+        i = parent; // move up the tree
       }
       else {
         break;
@@ -108,19 +108,19 @@ private:
   }
 
   void heapifyDown(int i) {
-    int heapSize = data_.size();
-    int bestIndex = i;
+    int heapSize = data_.size(); // for reuse
+    int bestIndex = i; // tracks index by highest priority 
     int firstChild = m_ * i + 1;
 
-    for (int j = 0; j < m_; j++) {
+    for (int j = 0; j < m_; j++) { // check all children 
       int child = firstChild + j;
-      if (child < heapSize && cmp_(data_[child], data_[bestIndex])) {
+      if (child < heapSize && cmp_(data_[child], data_[bestIndex])) {  // update if certain child has higher priority
         bestIndex = child;
       }
     }
     if(bestIndex != i) {
       std::swap(data_[i], data_[bestIndex]);
-      heapifyDown(bestIndex);
+      heapifyDown(bestIndex); // recurse down 
     }
   }
 };
